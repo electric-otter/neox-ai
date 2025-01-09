@@ -138,19 +138,24 @@
                 // Indicate that the response is being generated
                 addMessageToChatBox('Generating response...', 'bot');
 
-                // Fetch response based on NLP analysis
-                const response = await getResponse(userInput);
+                try {
+                    // Fetch response from custom LLM
+                    const response = await getResponseFromLLM(userInput);
 
-                // Remove the "Generating response..." message
-                const chatBox = document.getElementById('chat-box');
-                chatBox.lastChild.remove();
+                    // Remove the "Generating response..." message
+                    const chatBox = document.getElementById('chat-box');
+                    chatBox.lastChild.remove();
 
-                const botResponse = response || 'Sorry, I couldn’t find anything relevant.';
-                addMessageToChatBox(botResponse, 'bot');
-                addToConversationHistory(botResponse, 'bot');
+                    const botResponse = response || 'Sorry, I couldn’t find anything relevant.';
+                    addMessageToChatBox(botResponse, 'bot');
+                    addToConversationHistory(botResponse, 'bot');
 
-                // Learn from the interaction
-                learnFromInteraction(userInput, botResponse);
+                    // Learn from the interaction
+                    learnFromInteraction(userInput, botResponse);
+                } catch (error) {
+                    console.error('Error generating response:', error);
+                    addMessageToChatBox('Error generating response.', 'bot');
+                }
             }
         }
 
@@ -190,26 +195,14 @@
             });
         }
 
-        async function getResponse(userInput) {
-            const doc = nlp(userInput);
-            const keywords = doc.nouns().out('array');
-            if (keywords.length > 0) {
-                const response = await fetchDefinition(keywords[0]);
-                return `Here is the definition of ${keywords[0]}: ${response}`;
-            } else {
-                return 'I am not sure how to respond to that.';
-            }
-        }
-
-        async function fetchDefinition(query) {
-            const url = `https://www.dictionary.com/browse/${encodeURIComponent(query)}`;
+        async function getResponseFromLLM(userInput) {
+            const url = 'https://electric-otter.github.io/neox-ai/api.html';
             try {
-                const response = await axios.get(url);
-                const $ = cheerio.load(response.data);
-                const result = $('.css-1o58fj8.e1hk9ate4').first().text(); // Extract the first definition
-                return result;
+                const response = await axios.post(url, { input: userInput });
+                return response.data.output;
             } catch (error) {
-                return 'Failed to fetch the definition';
+                console.error('Error fetching response from LLM:', error);
+                return 'Failed to fetch response';
             }
         }
 
