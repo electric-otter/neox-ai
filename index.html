@@ -2,68 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NeoX</title>
+    <title>NeoX Neural Network</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
         }
 
         #chat-container {
-            width: 300px;
+            width: 400px;
             margin: 50px auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #header {
+            background-color: #007aff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            border-bottom: 1px solid #ccc;
         }
 
         #chat-box {
-            height: 200px;
-            overflow-y: scroll;
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
             border-bottom: 1px solid #ccc;
-            margin-bottom: 10px;
+        }
+
+        #user-input-container {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
         }
 
         #user-input {
-            width: calc(100% - 60px);
-            padding: 5px;
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #send-button, #model-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007aff;
+            color: white;
+            cursor: pointer;
         }
 
         #send-button {
-            width: 50px;
-            padding: 5px;
+            margin-right: 5px;
         }
 
         .user, .bot {
-            margin: 5px 0;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
         }
 
         .user {
-            text-align: right;
-            color: blue;
+            align-self: flex-end;
+            background-color: #007aff;
+            color: white;
+            margin-left: auto;
         }
 
         .bot {
-            text-align: left;
-            color: green;
+            align-self: flex-start;
+            background-color: #e0e0e0;
+            margin-right: auto;
+        }
+
+        #models-list {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #ai-info {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #666;
         }
 
         #warning {
             text-align: center;
             color: red;
             margin-bottom: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div id="chat-container">
+        <div id="header">NeoX Chatbot</div>
         <div id="warning">⚠️ Electric-Otter is still testing the AI. ⚠️</div>
         <div id="chat-box"></div>
-        <input type="text" id="user-input" placeholder="Type your message...">
-        <button id="send-button">Send</button>
+        <div id="user-input-container">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+            <button id="model-button">Show NeoX Models</button>
+        </div>
+        <div id="models-list"></div>
+        <div id="ai-info">Powered by NeoX AI</div>
     </div>
 
     <script>
         document.getElementById('send-button').addEventListener('click', sendMessage);
+        document.getElementById('model-button').addEventListener('click', showModels);
 
         function sendMessage() {
             const userInput = document.getElementById('user-input').value;
@@ -71,14 +134,9 @@
                 addMessageToChatBox(userInput, 'user');
                 document.getElementById('user-input').value = '';
 
-                // Read knowledge base and generate response
-                fetch('knowledge.txt')
-                    .then(response => response.text())
-                    .then(text => {
-                        const knowledgeBase = parseKnowledgeBase(text);
-                        const botResponse = generateBotResponse(userInput, knowledgeBase);
-                        addMessageToChatBox(botResponse, 'bot');
-                    });
+                // Placeholder for sending user input to the neural network
+                const response = neuralNetworkResponse(userInput);
+                addMessageToChatBox(response, 'bot');
             }
         }
 
@@ -91,25 +149,36 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function parseKnowledgeBase(text) {
-            const lines = text.split('\n');
-            const knowledgeBase = {};
-            lines.forEach(line => {
-                const [key, value] = line.split(':');
-                if (key && value) {
-                    knowledgeBase[key.trim().toLowerCase()] = value.trim();
-                }
-            });
-            return knowledgeBase;
+        function showModels() {
+            const models = [
+                "Model 1: NeoX-Model-A",
+                "Model 2: NeoX-Model-B",
+                "Model 3: NeoX-Model-C"
+            ];
+            const modelsListDiv = document.getElementById('models-list');
+            modelsListDiv.innerHTML = models.join('<br>');
+            modelsListDiv.style.display = 'block';
         }
 
-        function generateBotResponse(userInput, knowledgeBase) {
-            const normalizedInput = userInput.trim().toLowerCase();
-            if (knowledgeBase[normalizedInput]) {
-                return knowledgeBase[normalizedInput];
-            } else {
-                return "I'm not sure how to respond to that.";
-            }
+        // Define the neural network using TensorFlow.js
+        async function neuralNetworkResponse(userInput) {
+            const model = tf.sequential();
+            model.add(tf.layers.dense({ units: 8, activation: 'tanh', inputShape: [userInput.length] }));
+            model.add(tf.layers.dense({ units: 8, activation: 'tanh' }));
+            model.add(tf.layers.dense({ units: 8, activation: 'tanh' }));
+            model.add(tf.layers.dense({ units: 8, activation: 'tanh' }));
+            model.add(tf.layers.dense({ units: 8, activation: 'tanh' }));
+            model.add(tf.layers.dense({ units: 8, activation: 'tanh' }));
+            model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+            model.compile({ optimizer: tf.train.adam(10), loss: 'binaryCrossentropy', metrics: ['accuracy'] });
+
+            // Placeholder data for prediction
+            const inputTensor = tf.tensor2d([userInput.split('').map(char => char.charCodeAt(0))]);
+            const predictions = model.predict(inputTensor);
+            const output = predictions.arraySync()[0];
+
+            // Return the response based on the network's prediction
+            return `Neural network output: ${output}`;
         }
     </script>
 </body>
