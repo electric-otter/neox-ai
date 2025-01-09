@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #chat-container {
+            width: 300px;
+            margin: 50px auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #chat-box {
+            height: 200px;
+            overflow-y: scroll;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        #user-input {
+            width: calc(100% - 60px);
+            padding: 5px;
+        }
+
+        #send-button {
+            width: 50px;
+            padding: 5px;
+        }
+
+        .user, .bot {
+            margin: 5px 0;
+        }
+
+        .user {
+            text-align: right;
+            color: blue;
+        }
+
+        .bot {
+            text-align: left;
+            color: green;
+        }
+
+        #warning {
+            text-align: center;
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="warning">⚠️ Electric-Otter is still testing the AI. ⚠️</div>
+        <div id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+    </div>
+
+    <script>
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.trim() !== '') {
+                addMessageToChatBox(userInput, 'user');
+                document.getElementById('user-input').value = '';
+
+                // Read knowledge base and generate response
+                fetch('knowledge.txt')
+                    .then(response => response.text())
+                    .then(text => {
+                        const knowledgeBase = parseKnowledgeBase(text);
+                        const botResponse = generateBotResponse(userInput, knowledgeBase);
+                        addMessageToChatBox(botResponse, 'bot');
+                    });
+            }
+        }
+
+        function addMessageToChatBox(message, sender) {
+            const chatBox = document.getElementById('chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender;
+            messageDiv.textContent = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function parseKnowledgeBase(text) {
+            const lines = text.split('\n');
+            const knowledgeBase = {};
+            lines.forEach(line => {
+                const [key, value] = line.split(':');
+                if (key && value) {
+                    knowledgeBase[key.trim().toLowerCase()] = value.trim();
+                }
+            });
+            return knowledgeBase;
+        }
+
+        function generateBotResponse(userInput, knowledgeBase) {
+            const normalizedInput = userInput.trim().toLowerCase();
+            if (knowledgeBase[normalizedInput]) {
+                return knowledgeBase[normalizedInput];
+            } else {
+                return "I'm not sure how to respond to that.";
+            }
+        }
+    </script>
+</body>
+</html>
