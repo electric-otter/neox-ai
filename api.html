@@ -1,0 +1,74 @@
+<!-- api.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoX Developer Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>NeoX Developer Dashboard</h1>
+    </header>
+    <div class="container">
+        <section id="mainAIContent">
+            <!-- This section will dynamically load index.html content -->
+        </section>
+        <section>
+            <h2>Get API Key</h2>
+            <form id="apiKeyForm">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <button type="button" onclick="getApiKey()">Get API Key</button>
+            </form>
+            <p id="apiKeyResult"></p>
+        </section>
+        <section>
+            <h2>Use NeoX</h2>
+            <form id="useNeoxForm">
+                <label for="inputData">Input Data:</label>
+                <input type="text" id="inputData" name="inputData" required>
+                <button type="button" onclick="useNeoX()">Use NeoX</button>
+            </form>
+            <p id="outputResult"></p>
+        </section>
+    </div>
+    <script>
+        function loadMainAIContent() {
+            fetch('index.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('mainAIContent').innerHTML = data;
+                });
+        }
+
+        function getApiKey() {
+            const email = document.getElementById('email').value;
+            if (email) {
+                const apiKey = generateApiKey();
+                document.getElementById('apiKeyResult').innerText = `Your API Key: ${apiKey}`;
+            } else {
+                document.getElementById('apiKeyResult').innerText = 'Please enter a valid email address.';
+            }
+        }
+
+        function generateApiKey() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let apiKey = '';
+            for (let i = 0; i < 20; i++) {
+                apiKey += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return apiKey;
+        }
+
+        function useNeoX() {
+            const inputData = document.getElementById('inputData').value;
+            document.getElementById('outputResult').innerText = `NeoX Response: Processed ${inputData}`;
+        }
+
+        // Load the main AI content on page load
+        document.addEventListener('DOMContentLoaded', loadMainAIContent);
+    </script>
+</body>
+</html>
