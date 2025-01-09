@@ -122,12 +122,11 @@
         const { NlpManager } = window.nlpjs;
 
         const manager = new NlpManager({ languages: ['en'] });
-        
+
         // Train and save the model.
         async function trainNlp() {
             manager.addDocument('en', 'what is %word%', 'define');
             manager.addAnswer('en', 'define', 'Here is the definition of %word%:');
-
             await manager.train();
             manager.save();
         }
@@ -212,7 +211,7 @@
             try {
                 const response = await axios.get(url);
                 const $ = cheerio.load(response.data);
-                const result = $('.css-1urpfgu e16867sm0').first().text(); // Extract the first definition
+                const result = $('.css-1o58fj8 e1hk9ate4').first().text(); // Extract the first definition
                 return result;
             } catch (error) {
                 return 'Failed to fetch the definition';
