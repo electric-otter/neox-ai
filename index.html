@@ -119,6 +119,14 @@
     </div>
 
     <script>
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+        document.getElementById('model-button').addEventListener('click', showModels);
+        document.getElementById('user-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
         async function sendMessage() {
             const userInput = document.getElementById('user-input').value;
 
